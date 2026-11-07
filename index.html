@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Diwali, My Love! 🪔</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a052e, #3a005c);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            text-align: center;
+            overflow-x: hidden;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        h1 {
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            font-size: 1.1em;
+            color: #ff9933;
+            margin-bottom: 20px;
+        }
+        #game-canvas {
+            background: rgba(0, 0, 0, 0.4);
+            border: 3px solid #ff9933;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 153, 51, 0.3);
+            max-width: 100%;
+            cursor: pointer;
+        }
+        .btn {
+            background: linear-gradient(90deg, #ff9933, #d4af37);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 153, 51, 0.4);
+            transition: 0.3s;
+            margin-top: 15px;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
+        #surprise-screen {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            animation: fadeIn 1.5s ease-in-out;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+        .heart {
+            color: #ff3366;
+            font-size: 1.5em;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="start-screen">
+            <h1>Happy Diwali, My Love! 🪔</h1>
+            <p class="subtitle">Catch 10 Laddoos to light up the final Diya and unlock your surprise!</p>
+            <button class="btn" onclick="startGame()">Start the Gift Game</button>
+        </div>
+
+        <div id="game-container" style="display: none;">
+            <h2 style="color: #ffd700;">Score: <span id="score-val">0</span> / 10</h2>
+            <canvas id="game-canvas" width="400" height="500"></canvas>
+            <p style="font-size: 0.9em; color: #aaa;">Tap/Click Left or Right side of the game screen to move the Diya bowl!</p>
+        </div>
+
+        <div id="surprise-screen">
+            <h1 style="font-size: 2.5em;">✨ Happy Diwali ✨</h1>
+            <p class="heart">❤️🪔❤️</p>
+            <p style="font-size: 1.2em; line-height: 1.6; color: #fff;">
+                "Just like the lights of Diwali, you illuminate my entire world. Thank you for filling my life with sweetness, laughter, and endless warmth. Wishing us a bright year ahead together!"
+            </p>
+            <p style="font-weight: bold; color: #ffd700; font-size: 1.3em; margin-top: 20px;">— Forever Yours Yours ❤️</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        let score = 0;
+        let gameActive = false;
+
+        // Game objects
+        const basket = { x: 175, y: 440, width: 60, height: 25, speed: 7 };
+        let items = [];
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            gameActive = true;
+            spawnItem();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Control adjustments for touch/click
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            if (clickX < canvas.width / 2) {
+                basket.x = Math.max(0, basket.x - 40);
+            } else {
+                basket.x = Math.min(canvas.width - basket.width, basket.x + 40);
+            }
+        });
+
+        // Key controls
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') basket.x = Math.max(0, basket.x - basket.speed * 3);
+            if (e.key === 'ArrowRight') basket.x = Math.min(canvas.width - basket.width, basket.x + basket.speed * 3);
+        });
+
+        function spawnItem() {
+            if (!gameActive) return;
+            items.push({
+                x: Math.random() * (canvas.width - 20) + 10,
+                y: 0,
+                speed: Math.random() * 2 + 2,
+                radius: 12
+            });
+            setTimeout(spawnItem, 1200);
+        }
+
+        function gameLoop() {
+            if (!gameActive) return;
+
+            // Clear screen
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Basket (Diya Plate)
+            ctx.fillStyle = '#ff9933';
+            ctx.beginPath();
+            ctx.arc(basket.x + basket.width/2, basket.y, basket.width/2, 0, Math.PI);
+            ctx.fill();
+            // Diya Flame
+            ctx.fillStyle = '#ffcc00';
+            ctx.beginPath();
+            ctx.moveTo(basket.x + basket.width/2, basket.y - 12);
+            ctx.quadraticCurveTo(basket.x + basket.width/2 - 5, basket.y - 2, basket.x + basket.width/2, basket.y);
+            ctx.quadraticCurveTo(basket.x + basket.width/2 + 5, basket.y - 2, basket.x + basket.width/2, basket.y - 12);
+            ctx.fill();
+
+            // Move & Draw Falling Laddoos
+            for (let i = items.length - 1; i >= 0; i--) {
+                let item = items[i];
+                item.y += item.speed;
+
+                // Draw Laddoo
+                ctx.fillStyle = '#ffcc33';
+                ctx.beginPath();
+                ctx.arc(item.x, item.y, item.radius, 0, Math.PI * 2);
+                ctx.fill();
+                // Little shade highlight
+                ctx.fillStyle = '#e69900';
+                ctx.beginPath();
+                ctx.arc(item.x - 3, item.y - 3, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Collision Check
+                if (item.y + item.radius >= basket.y && item.x >= basket.x && item.x <= basket.x + basket.width) {
+                    items.splice(i, 1);
+                    score++;
+                    document.getElementById('score-val').innerText = score;
+                    
+                    if (score >= 10) {
+                        endGame();
+                        return;
+                    }
+                    continue;
+                }
+
+                // Remove out of bounds items
+                if (item.y > canvas.height) {
+                    items.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            gameActive = false;
+            document.getElementById('game-container').style.display = 'none';
+            document.getElementById('surprise-screen').style.display = 'block';
+        }
+    </script>
+</body>
+  </html>
+  
